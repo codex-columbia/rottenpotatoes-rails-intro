@@ -6,6 +6,6 @@ class Movie < ApplicationRecord
   def self.with_ratings(ratings_list)
     return all if ratings_list.nil? || ratings_list.empty?
 
-    where(rating: ratings_list)
+    where("LOWER(rating) IN (?)", ratings_list.map(&:downcase))
   end
 end
