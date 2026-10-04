@@ -5,13 +5,30 @@ class MoviesController < ApplicationController
 def index
   @all_ratings = Movie.all_ratings
 
-  if params[:ratings].present?
-    @ratings_to_show = params[:ratings].keys
+  # If settings were explicitly submitted, use and remember them.
+  if params[:sort_by].present? || params[:ratings].present?
+    @ratings_to_show =
+      if params[:ratings].present?
+        params[:ratings].keys
+      else
+        @all_ratings
+      end
+
+    @sort_by = params[:sort_by]
+
+    session[:ratings] = @ratings_to_show
+    session[:sort_by] = @sort_by
+
+  # No relevant params: restore previous settings from the session.
+  elsif session[:ratings].present? || session[:sort_by].present?
+    @ratings_to_show = session[:ratings] || @all_ratings
+    @sort_by = session[:sort_by]
+
+  # Very first visit.
   else
     @ratings_to_show = @all_ratings
+    @sort_by = nil
   end
-
-  @sort_by = params[:sort_by]
 
   @movies = Movie.with_ratings(@ratings_to_show)
 
